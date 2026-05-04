@@ -112,7 +112,6 @@ export const apiGroups = [
         ],
 
         parameters: [
-          { name: "page", in: "query", type: "number", required: false },
         ],
 
         requestBody: null,
