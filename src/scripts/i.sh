@@ -23,10 +23,19 @@ test_request() {
   local DATA=$4
 
   echo ""
-  echo "=============================="
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo "🚀 $NAME"
-  echo "🔍 URL: $URL"
-  echo "=============================="
+  echo "🔗 URL: $URL"
+  echo "📌 METHOD: $METHOD"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+  # RESPONSE BODY
+  response=$(curl -s \
+    -X $METHOD \
+    -H "$AUTH_HEADER" \
+    -H "$JSON_HEADER" \
+    ${DATA:+-d "$DATA"} \
+    $URL)
 
   # STATUS
   status=$(curl -s -o /dev/null -w "%{http_code}" \
@@ -36,8 +45,6 @@ test_request() {
     ${DATA:+-d "$DATA"} \
     $URL)
 
-  echo "📡 Status Code: $status"
-
   # TIME
   time_total=$(curl -s -o /dev/null -w "%{time_total}" \
     -X $METHOD \
@@ -45,8 +52,6 @@ test_request() {
     -H "$JSON_HEADER" \
     ${DATA:+-d "$DATA"} \
     $URL)
-
-  echo "⏱️ Response Time: ${time_total}s"
 
   # SIZE
   size=$(curl -s -o /dev/null -w "%{size_download}" \
@@ -56,22 +61,38 @@ test_request() {
     ${DATA:+-d "$DATA"} \
     $URL)
 
-  echo "📦 Response Size: ${size} bytes"
+  echo ""
+  echo "📡 STATUS      : $status"
+  echo "⏱️ RESPONSE TIME: ${time_total}s"
+  echo "📦 SIZE        : ${size} bytes"
 
   echo ""
-  echo "🔁 Loop test (5 requests)"
-  for i in {1..5}
-  do
-    code=$(curl -s -o /dev/null -w "%{http_code}" \
-      -X $METHOD \
-      -H "$AUTH_HEADER" \
-      -H "$JSON_HEADER" \
-      ${DATA:+-d "$DATA"} \
-      $URL)
+  echo "📨 RESPONSE:"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-    echo "Request $i → $code"
-    sleep 1
-  done
+  # format JSON đẹp nếu có jq
+  echo "$response" | jq . 2>/dev/null || echo "$response"
+
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+  echo ""
+  echo "🔁 LOOP TEST (5 REQUESTS)"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+#  for i in {1..5}
+ # do
+  #  code=$(curl -s -o /dev/null -w "%{http_code}" \
+   #   -X $METHOD \
+    #  -H "$AUTH_HEADER" \
+     # -H "$JSON_HEADER" \
+      #${DATA:+-d "$DATA"} \
+      #$URL)
+
+    #echo "[$i] → HTTP $code"
+    #sleep 1
+  #done
+
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 }
 
 # =========================
@@ -88,7 +109,7 @@ test_request "GET PAYMENTS" "$PAYMENTS_URL"
 test_request "GET PAYMENT BY ID" "$PAYMENT_URL"
 
 # 4. MAKE QR CODE (POST)
-QR_BODY='{"amount":5000,"expired":1}'
+QR_BODY='{"amount":5000,"expired":5}'
 test_request "MAKE QR CODE" "$MAKEQRCODE_URL" "POST" "$QR_BODY"
 
 echo ""

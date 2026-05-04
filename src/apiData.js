@@ -1,4 +1,5 @@
-export const BASE_URL = "https://mpeg-draw-document-worship.trycloudflare.com";
+export const BASE_URL =
+  "https://mpeg-draw-document-worship.trycloudflare.com";
 
 export const apiGroups = [
   {
@@ -29,7 +30,6 @@ export const apiGroups = [
         ],
 
         parameters: [],
-
         requestBody: null,
 
         responses: [
@@ -42,29 +42,12 @@ export const apiGroups = [
               message: "Thành công",
             },
           },
-          {
-            status: 400,
-            description: "Bad Request",
-            body: {
-              success: false,
-              error: "Bad Request",
-              message: "Dữ liệu không hợp lệ",
-            },
-          },
-          {
-            status: 401,
-            description: "Unauthorized",
-            body: {
-              success: false,
-              error: "Unauthorized",
-              message: "Token không hợp lệ hoặc hết hạn",
-            },
-          },
         ],
       },
     ],
   },
 
+  /* ================= SYSTEM ================= */
   {
     name: "System",
     endpoints: [
@@ -84,22 +67,22 @@ export const apiGroups = [
         example: [
           {
             label: "curl",
-            code: `curl ${BASE_URL}/health`,
+            code: `curl -X GET ${BASE_URL}/health`,
           },
           {
             label: "nodejs",
-            code: `fetch('${BASE_URL}/health')`,
+            code: `fetch("${BASE_URL}/health")
+  .then(res => res.json())
+  .then(console.log);`,
           },
         ],
 
         responses: [
           {
             status: 200,
-            description: "System is running",
+            description: "Server response",
             body: {
-              status: "UP",
-              timestamp: "2026-04-30T11:00:00.000Z",
-              uptime: 3600,
+              status: "ok",
             },
           },
         ],
@@ -107,9 +90,11 @@ export const apiGroups = [
     ],
   },
 
+  /* ================= PAYMENT ================= */
   {
     name: "Payment",
     endpoints: [
+      /* ================= GET ALL ================= */
       {
         id: "get-payments",
         method: "GET",
@@ -127,71 +112,64 @@ export const apiGroups = [
         ],
 
         parameters: [
-          {
-            name: "page",
-            in: "query",
-            type: "number",
-            required: false,
-            description: "Trang (default: 1)",
-          },
-          {
-            name: "limit",
-            in: "query",
-            type: "number",
-            required: false,
-            description: "Số lượng (default: 10)",
-          },
-          {
-            name: "status",
-            in: "query",
-            type: "string",
-            required: false,
-            description: "PENDING | SUCCESS | FAILED",
-          },
-        ],
-
-        example: [
-          {
-            label: "curl",
-            code: `curl ${BASE_URL}/payments -H "Authorization: Bearer token"`,
-          },
-          {
-            label: "nodejs",
-            code: `fetch('${BASE_URL}/payments', {
-  headers: {
-       Authorization: 'Bearer token',
-       'Content-Type': 'application/json'
-  }
-})`,
-          },
+          { name: "page", in: "query", type: "number", required: false },
+          { name: "limit", in: "query", type: "number", required: false },
+          { name: "status", in: "query", type: "string", required: false },
         ],
 
         requestBody: null,
 
+        example: [
+          {
+            label: "curl",
+            code: `curl -X GET ${BASE_URL}/payments \\
+  -H "Authorization: Bearer test"`,
+          },
+          {
+            label: "nodejs",
+            code: `fetch("${BASE_URL}/payments", {
+  headers: {
+    Authorization: "Bearer test"
+  }
+}).then(r => r.json()).then(console.log);`,
+          },
+        ],
+
         responses: [
           {
             status: 200,
-            description: "Success",
+            description: "Paginated payment list",
             body: {
-              data: [
-                {
-                  id: "pay_12345",
-                  amount: 150000,
-                  currency: "VND",
-                  status: "SUCCESS",
-                  createdAt: "2026-04-30T10:00:00.000Z",
+              success: true,
+              data: {
+                data: [
+                  {
+                    _id: "69f83b3c4a2240c8fb37f8d9",
+                    id: "uuid",
+                    amount: 5000,
+                    status: "expired",
+                    orderCode: "ORDERXXXX",
+                    vaNumber: "101499100004608511",
+                    bankName: "KienLongBank",
+                    qrCode: "https://qr.sepay.vn/img?...",
+                    payBy: "Sepay",
+                    expiredAt: "2026-05-04T06:23:52.260Z",
+                    createdAt: "2026-05-04T06:22:52.260Z",
+                  },
+                ],
+                pagination: {
+                  total: 25,
+                  page: 1,
+                  limit: 10,
+                  totalPages: 3,
                 },
-              ],
-              meta: {
-                total: 150,
-                page: 1,
-                limit: 10,
               },
             },
           },
         ],
       },
 
+      /* ================= GET BY ID ================= */
       {
         id: "get-payment-by-id",
         method: "GET",
@@ -204,143 +182,122 @@ export const apiGroups = [
             name: "Authorization",
             type: "string",
             required: true,
-            description: "Bearer token",
           },
         ],
 
         parameters: [
-          {
-            name: "id",
-            in: "path",
-            type: "string",
-            required: true,
-            description: "Payment ID",
-          },
-        ],
-        example: [
-          {
-            label: "curl",
-            code: `curl ${BASE_URL}/payment/1234567890 -H "Authorization: Bearer token"`,
-          },
-          {
-            label: "nodejs",
-            code: `fetch('${BASE_URL}/payment/1234567890', {
-  headers: {
-       Authorization: 'Bearer token',
-       'Content-Type': 'application/json'
-  }
-})`,
-          },
+          { name: "id", in: "path", type: "string", required: true },
         ],
 
         requestBody: null,
 
+        example: [
+          {
+            label: "curl",
+            code: `curl -X GET ${BASE_URL}/payment/123 \\
+  -H "Authorization: Bearer test"`,
+          },
+          {
+            label: "nodejs",
+            code: `fetch("${BASE_URL}/payment/123", {
+  headers: {
+    Authorization: "Bearer test"
+  }
+}).then(r => r.json()).then(console.log);`,
+          },
+        ],
+
         responses: [
           {
             status: 200,
-            description: "Success",
+            description: "Payment detail",
             body: {
-              id: "pay_12345",
-              amount: 150000,
-              currency: "VND",
-              status: "SUCCESS",
-            },
-          },
-          {
-            status: 404,
-            description: "Not found",
-            body: {
-              error: "Not Found",
-              message: "Payment not found",
+              success: true,
+              data: {
+                _id: "69f7954410dde4ea4555fe92",
+                id: "1",
+                amount: 10000,
+                status: "expired",
+                orderCode: "ORDERXXXX",
+                vaNumber: "101499100004577021",
+                bankName: "KienLongBank",
+                qrCode: "https://qr.sepay.vn/img?...",
+                payBy: "Sepay",
+                createdAt: "2026-05-03T18:34:44.381Z",
+                expiredAt: "2026-05-03T18:49:44.381Z",
+              },
             },
           },
         ],
       },
 
+      /* ================= QR CODE ================= */
       {
         id: "qr-code-payment",
         method: "POST",
         path: "/payment/qr-code",
         title: "Generate QR Code",
-        description: "Tạo mã QR thanh toán.",
+        description: "Tạo mã QR thanh toán SEPAY.",
 
         headers: [
           {
             name: "Authorization",
             type: "string",
             required: true,
-            description: "Bearer token",
+          },
+          {
+            name: "Content-Type",
+            type: "string",
+            required: true,
           },
         ],
 
         parameters: [],
+
+        requestBody: {
+          type: "application/json",
+          example: {
+            amount: 250000,
+            expired: 15,
+          },
+        },
 
         example: [
           {
             label: "curl",
-            code: `curl ${BASE_URL}/payment/qr-code -H "Authorization: Bearer token" -d "{'amount':10000,'expired':15}"`,
+            code: `curl -X POST ${BASE_URL}/payment/qr-code \\
+  -H "Authorization: Bearer test" \\
+  -H "Content-Type: application/json" \\
+  -d '{"amount":250000,"expired":15}'`,
           },
           {
             label: "nodejs",
-            code: `fetch('${BASE_URL}/payment/qr-code', {
+            code: `fetch("${BASE_URL}/payment/qr-code", {
+  method: "POST",
   headers: {
-       Authorization: 'Bearer token',
-       'Content-Type': 'application/json',
+    Authorization: "Bearer test",
+    "Content-Type": "application/json"
   },
   body: JSON.stringify({
-       amount:10000,
-       expired:15
-  }) 
-})`,
+    amount: 250000,
+    expired: 15
+  })
+}).then(r => r.json()).then(console.log);`,
           },
         ],
-        requestBody: {
-          type: "application/json",
-          example: {
-            amount: 250000,
-            expired: "15 (Tinh theo phut)", 
-          },
-        },
 
         responses: [
           {
             status: 200,
-            description: "QR generated",
-            body: {
-              qrCodeData: "000201...",
-              qrCodeImageUrl: "https://api.vietqr.io/image/...",
-            },
-          },
-        ],
-      },
-
-      {
-        id: "webhook-payment",
-        method: "POST",
-        path: "/webhook/payment",
-        title: "Payment Webhook",
-        description: "Webhook nhận callback thanh toán.",
-
-        headers: [],
-
-        parameters: [],
-
-        requestBody: {
-          type: "application/json",
-          example: {
-            transactionId: "bank_tx_88992211",
-            amount: 250000,
-            signature: "HMAC_SHA256",
-          },
-        },
-
-        responses: [
-          {
-            status: 200,
-            description: "Webhook success",
+            description: "QR created",
             body: {
               success: true,
-              message: "Processed",
+              data: {
+                orderCode: "ORDERXXXX",
+                qrCode: "https://qr.sepay.vn/img?...",
+                vaNumber: "101499100004608511",
+                expiredAt: "2026-05-04T06:23:52.260Z",
+              },
             },
           },
         ],
