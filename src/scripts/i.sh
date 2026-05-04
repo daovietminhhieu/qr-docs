@@ -79,18 +79,18 @@ test_request() {
   echo "🔁 LOOP TEST (5 REQUESTS)"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-#  for i in {1..5}
- # do
-  #  code=$(curl -s -o /dev/null -w "%{http_code}" \
-   #   -X $METHOD \
-    #  -H "$AUTH_HEADER" \
-     # -H "$JSON_HEADER" \
-      #${DATA:+-d "$DATA"} \
-      #$URL)
+  for i in {1..15}
+  do
+    code=$(curl -s -o /dev/null -w "%{http_code}" \
+      -X $METHOD \
+      -H "$AUTH_HEADER" \
+      -H "$JSON_HEADER" \
+      ${DATA:+-d "$DATA"} \
+      $URL)
 
-    #echo "[$i] → HTTP $code"
-    #sleep 1
-  #done
+    echo "[$i] → HTTP $code"
+    sleep 1
+  done
 
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 }
@@ -109,7 +109,7 @@ test_request "GET PAYMENTS" "$PAYMENTS_URL"
 test_request "GET PAYMENT BY ID" "$PAYMENT_URL"
 
 # 4. MAKE QR CODE (POST)
-QR_BODY='{"amount":5000,"expired":5}'
+QR_BODY='{"amount":15000,"expired":30}'
 test_request "MAKE QR CODE" "$MAKEQRCODE_URL" "POST" "$QR_BODY"
 
 echo ""
